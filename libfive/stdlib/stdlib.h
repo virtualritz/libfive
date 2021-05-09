@@ -165,6 +165,9 @@ LIBFIVE_STDLIB libfivestd_emptiness(
     // A value which is empty everywhere
     );
 
+////////////////////////////////////////////////////////////////////////////////
+LIBFIVE_SECTION(generators)
+
 LIBFIVE_STDLIB libfivestd_array_x(
     // Iterates a part in a 1D array
     libfive_tree shape, int nx, tfloat dx);

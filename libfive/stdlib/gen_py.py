@@ -137,9 +137,8 @@ move.__doc__ = _move_prev.__doc__
 
 
 stdlib = parse.parse_stdlib()
-for m in ['csg', 'shapes', 'transforms', 'text']:
+for m in ['csg', 'shapes', 'generators', 'transforms', 'text']:
     with open('../bind/python/libfive/stdlib/%s.py' % m, 'w') as f:
         f.write(format_module(stdlib, m))
         if m in append:
             f.write(append[m])
-

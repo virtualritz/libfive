@@ -122,6 +122,8 @@ LIBFIVE_STDLIB libfivestd_gyroid(tvec3 period, tfloat thickness) {
 LIBFIVE_STDLIB libfivestd_emptiness() {
     return emptiness_().release();
 }
+////////////////////////////////////////////////////////////////////////////////
+// generators
 LIBFIVE_STDLIB libfivestd_array_x(libfive_tree shape, int nx, tfloat dx) {
     return array_x(Tree(shape), nx, Tree(dx)).release();
 }
