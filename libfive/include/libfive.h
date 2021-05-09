@@ -278,6 +278,11 @@ libfive_interval libfive_tree_eval_r(libfive_tree t, libfive_region3 r);
 libfive_vec3 libfive_tree_eval_d(libfive_tree t, libfive_vec3 p);
 
 /*
+ * Build a new tree by cloning (increasing the refcount).
+*/
+libfive_tree libfive_tree_clone(libfive_tree t);
+
+/*
  *  Deletes a tree.  If binding in a higher-level language, call this in
  *  a destructor / finalizer to avoid leaking memory
  */

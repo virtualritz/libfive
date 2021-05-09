@@ -146,6 +146,16 @@ libfive_tree libfive_tree_binary(int op, libfive_tree a, libfive_tree b)
         : nullptr;
 }
 
+libfive_tree libfive_tree_clone(libfive_tree t)
+{
+    libfive_tree clone = t;
+    // Build a new tree (increasing the refcount), then release it (without
+    // decrementing the refcount) to create a spare raw pointer.  This must
+    // be deleted with `libfive_tree_delete` to avoid memory leaks.
+    Tree(clone).release();
+    return clone;
+}
+
 const void* libfive_tree_id(libfive_tree t)
 {
     return static_cast<const void*>(t);
