@@ -27,7 +27,7 @@ extern "C" {
 ////////////////////////////////////////////////////////////////////////////////
 LIBFIVE_SECTION(csg)
 
-LIBFIVE_STDLIB libfivestd__union(
+LIBFIVE_STDLIB libfivestd_union(
     // Returns the union of two shapes
     libfive_tree a, libfive_tree b);
 LIBFIVE_STDLIB libfivestd_intersection(

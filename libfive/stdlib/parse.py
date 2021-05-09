@@ -1,11 +1,11 @@
 from collections import namedtuple
 
 Declaration = namedtuple('Declaration', ['name', 'version', 'docstring', 'args', 'raw_name'])
-Argument = namedtuple('Argument', ['name', 'type', 'default'])
+Argument = namedtuple('Argument', ['name', 'type', 'default', 'index'])
 Module = namedtuple('Module', ['shapes', 'aliases'])
 Alias = namedtuple('Alias', ['name', 'target'])
 
-def parse_arg(arg):
+def parse_arg(index, arg):
     ''' Parses a single argument, returning an Argument
     '''
     *type, name = arg.split(' ')
@@ -14,7 +14,7 @@ def parse_arg(arg):
     if '__' in name:
         default = name.split('__')[1]
     name = name.split('__')[0]
-    return Argument(name=name, type=type, default=default)
+    return Argument(name=name, type=type, default=default, index=index)
 
 def parse_decl(line, f):
     ''' Parses a single declaration, returning a Declaration
@@ -29,27 +29,27 @@ def parse_decl(line, f):
     else:
         version = None
 
-    if name.startswith('_'):
-        raw_name = name
-        name = name[1:]
-    else:
-        raw_name = None
+    raw_name = name
+    name = name[11:]
 
     doc = ''
     if rest.endswith(');'): # single-line form
-        args = [parse_arg(s.strip()) for s in rest.strip(');').split(',')]
+        args = [parse_arg(i, s.strip()) for i, s in enumerate(rest.strip(');').split(','))]
     else:
         args = []
+        start = 0
         while True:
             line = f.readline().strip()
             if line.startswith('// '):
                 doc += line[3:] + '\n'
             else:
-                args += [parse_arg(s.strip()) for s in
-                         line.strip(');').split(',') if s]
+                args += [parse_arg(i + start, s.strip()) for i, s in
+                         enumerate(line.strip(');').split(',')) if s]
+                start += len(line.strip(');').split(','))
 
             if line.endswith(');'):
                 break
+
     if any([a.name == name for a in args]):
         raise RuntimeError("Argument shadows function name in '%s'" % name)
 

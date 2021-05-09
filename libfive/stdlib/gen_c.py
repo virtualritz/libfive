@@ -27,10 +27,11 @@ def format_module_stdlib(lib, m):
     for f in lib[m].shapes:
         args_in = ", ".join(map(arg_in, f.args))
         args_out = ", ".join(map(arg_out, f.args))
-        out += '''LIBFIVE_STDLIB {name}({args_in}) {{
+        out += '''LIBFIVE_STDLIB {raw_name}({args_in}) {{
     return {name}{u}({args_out}).release();
 }}
-'''.format(name=f.raw_name or f.name,
+'''.format(raw_name=f.raw_name,
+           name='_union' if 'union' == f.name else f.name,
            u='' if f.args else '_',
            args_in=args_in,
            args_out=args_out)
@@ -59,7 +60,7 @@ def format_module_header(lib, m):
     for f in lib[m].shapes:
         args_call = ", ".join(map(arg_call, f.args))
         out += '''libfive::Tree {name}{u}({args_call});
-'''.format(name=f.raw_name or f.name,
+'''.format(name='_union' if 'union' == f.name else f.name,
            u='' if f.args else '_',
            args_call=args_call)
     return out
@@ -111,4 +112,3 @@ typedef libfive::Tree TreeFloat;
 '''.format(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), os.getlogin()))
     for m in stdlib:
         f.write(format_module_header(stdlib, m))
-
