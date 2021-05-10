@@ -82,7 +82,9 @@ TEST_CASE("libfive_tree_render_slice")
     auto one = libfive_tree_const(1.0f);
     auto d = libfive_tree_binary(Opcode::OP_SUB, r, one);
 
-    auto cs = libfive_tree_render_slice(d, {{-2, 2}, {-2, 2}}, 0, 10);
+    auto s = LIBFIVE_BREP_SETTINGS_DEFAULT();
+    s.res = 10;
+    auto cs = libfive_tree_render_slice(d, {{-2, 2}, {-2, 2}}, 0, s);
     REQUIRE(cs->count == 1);
     REQUIRE(cs->cs[0].count > 0);
     float rmin = 2;
@@ -117,7 +119,9 @@ TEST_CASE("libfive_tree_render_mesh")
     auto one = libfive_tree_const(1.0f);
     auto d = libfive_tree_binary(Opcode::OP_SUB, r, one);
 
-    auto m = libfive_tree_render_mesh(d, {{-2, 2}, {-2, 2}, {-2, 2}}, 10);
+    auto s = LIBFIVE_BREP_SETTINGS_DEFAULT();
+    s.res = 10;
+    auto m = libfive_tree_render_mesh(d, {{-2, 2}, {-2, 2}, {-2, 2}}, s);
 
     float rmin = 2;
     float rmax = 0;

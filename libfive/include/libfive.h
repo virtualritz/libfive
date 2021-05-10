@@ -19,46 +19,47 @@ extern "C" {
 #endif
 
 /*
- *  libfive_interval is a range used in interval arithmetic
+ *  libfive_interval is a range used in interval arithmetic.
+ *
  *  It usually represents either a spatial region (along a single axis)
  *  or a range that is guaranteed to contain a value.
  */
 typedef struct libfive_interval  { float lower; float upper; } libfive_interval;
 
 /*
- *  libfive_region2:  A 2D region
+ *  libfive_region2:  A 2D region.
  */
 typedef struct libfive_region2   { libfive_interval X, Y; } libfive_region2;
 
 /*
- *  libfive_region3:  A 3D region
+ *  libfive_region3:  A 3D region.
  */
 typedef struct libfive_region3   { libfive_interval X, Y, Z; } libfive_region3;
 
 /*
- *  libfive_vec2:  A 2D point or vector
+ *  libfive_vec2:  A 2D point or vector.
  */
 typedef struct libfive_vec2      { float x, y; } libfive_vec2;
 
 /*
- *  libfive_vec3:  A 3D point or vector
+ *  libfive_vec3:  A 3D point or vector.
  */
 typedef struct libfive_vec3      { float x, y, z; } libfive_vec3;
 
 /*
- *  libfive_vec4:  A 4D point or vector
+ *  libfive_vec4:  A 4D point or vector.
  */
 typedef struct libfive_vec4      { float x, y, z, w; } libfive_vec4;
 
 /*
  *  libfive_tri:    A triangle, with corners stored as indices
- *  into a separate vertex array
+ *  into a separate vertex array.
  */
 typedef struct libfive_tri       { uint32_t a, b, c; } libfive_tri;
 
 /*
  *  libfive_contour is a single 2D contour, consisting of a sequence of
- *  2D points plus a count of how many points are stored
+ *  2D points plus a count of how many points are stored.
  */
 typedef struct libfive_contour {
     libfive_vec2* pts;
@@ -67,7 +68,7 @@ typedef struct libfive_contour {
 
 /*
  *  libfive_contour is a set of 2D contours, consisting of multiple
- *  libfive_contour objects and a count of how many are stored
+ *  libfive_contour objects and a count of how many are stored.
  */
 typedef struct libfive_contours {
     libfive_contour* cs;
@@ -76,7 +77,7 @@ typedef struct libfive_contours {
 
 /*
  *  libfive_contour3 is a single 2D contour, consisting of a sequence of
- *  3D points plus a count of how many points are stored
+ *  3D points plus a count of how many points are stored.
  */
 typedef struct libfive_contour3 {
     libfive_vec3* pts;
@@ -85,7 +86,7 @@ typedef struct libfive_contour3 {
 
 /*
  *  libfive_contours3 is a set of 2D contours, consisting of multiple
- *  libfive_contour3 objects and a count of how many are stored
+ *  libfive_contour3 objects and a count of how many are stored.
  */
 typedef struct libfive_contours3 {
     libfive_contour3* cs;
@@ -118,8 +119,9 @@ typedef struct libfive_mesh_coords {
 } libfive_mesh_coords;
 
 /*
- *  libfive_pixels is a bitmap representing occupancy
- *  There are width * height pixels, in row-major order
+ *  libfive_pixels is a bitmap representing occupancy.
+ *
+ *  There are width * height pixels, in row-major order.
  */
 typedef struct libfive_pixels {
     bool* pixels;
@@ -127,30 +129,63 @@ typedef struct libfive_pixels {
     uint32_t height;
 } libfive_pixels;
 
+typedef enum libfive_brep_alg {
+    DUAL_CONTOURING,
+    ISO_SIMPLEX,
+    HYBRID,
+} libfive_brep_alg;
+
+/*
+ * Settings passed to any of the rendering/export functions.
+ */
+typedef struct libfive_brep_settings {
+        /*  The meshing region is subdivided until the smallest region edge
+         *  is below 1/res in size.  Make this larger to get a higher resolution
+         *  model. */
+        float res;
+        /*  This value is used when deciding whether to collapse cells.  If it
+         *  is very large, then only linear regions are merged.  Set as 0.1 to
+         *  completely disable cell merging. */
+        float quality;
+        /*  Number of worker threads to use while meshing.  Set as 0 to use the
+         *  platform-default number of threads. */
+        unsigned workers;
+        /* The meshing algorithm. */
+        libfive_brep_alg alg;
+} libfive_brep_settings;
+
+#define LIBFIVE_BREP_SETTINGS_DEFAULT() \
+    libfive_brep_settings { 10, 8, 8, libfive_brep_alg::DUAL_CONTOURING }
+
+/*
+ *  Returns libfive_brep_settings with default values.
+ */
+libfive_brep_settings libfive_brep_settings_default();
+
 ////////////////////////////////////////////////////////////////////////////////
 
 /*
- *  Frees an libfive_contours data structure
+ *  Frees an libfive_contours data structure.
  */
 void libfive_contours_delete(libfive_contours* cs);
 
 /*
- *  Frees an libfive_contours data structure
+ *  Frees an libfive_contours data structure.
  */
 void libfive_contours3_delete(libfive_contours3* cs);
 
 /*
- *  Frees an libfive_mesh data structure
+ *  Frees an libfive_mesh data structure.
  */
 void libfive_mesh_delete(libfive_mesh* m);
 
 /*
- *  Frees an libfive_mesh_coords data structure
+ *  Frees an libfive_mesh_coords data structure.
  */
 void libfive_mesh_coords_delete(libfive_mesh_coords* m);
 
 /*
- *  Frees an libfive_pixels data structure
+ *  Frees an libfive_pixels data structure.
  */
 void libfive_pixels_delete(libfive_pixels* ps);
 
@@ -162,7 +197,7 @@ int libfive_opcode_enum(const char* op);
 
 /*
  *  Returns the number of arguments for the given opcode
- *  (either 0, 1, 2, or -1 if the opcode is invalid)
+ *  (either 0, 1, 2, or -1 if the opcode is invalid).
  */
 int libfive_opcode_args(int op);
 
@@ -170,7 +205,8 @@ int libfive_opcode_args(int op);
 
 /*  libfive_vars is a general-purpose struct for mapping a set of
  *  free variables to their values.  The variables are opaque
- *  pointers, i.e. values returned with libfive_tree_id. */
+ *  pointers, i.e. values returned with libfive_tree_id.
+ */
 typedef struct libfive_vars {
     void* const* vars;
     float* values;
@@ -192,32 +228,32 @@ typedef struct libfive_evaluator_ *libfive_evaluator;
 #endif
 
 /*
- *  Constructs a new tree that returns the X coordinate
+ *  Constructs a new tree that returns the X coordinate.
  */
 libfive_tree libfive_tree_x();
 
 /*
- *  Constructs a new tree that returns the Y coordinate
+ *  Constructs a new tree that returns the Y coordinate.
  */
 libfive_tree libfive_tree_y();
 
 /*
- *  Constructs a new tree that returns the Z coordinate
+ *  Constructs a new tree that returns the Z coordinate.
  */
 libfive_tree libfive_tree_z();
 
 /*
- *  Constructs a new tree that contains a free variable
+ *  Constructs a new tree that contains a free variable.
  */
 libfive_tree libfive_tree_var();
 
 /*
- *  Returns true if the given tree is a free variable
+ *  Returns true if the given tree is a free variable.
  */
 bool libfive_tree_is_var(libfive_tree t);
 
 /*
- *  Constructs a new tree that contains the given constant value
+ *  Constructs a new tree that contains the given constant value.
  */
 libfive_tree libfive_tree_const(float f);
 
@@ -228,14 +264,14 @@ libfive_tree libfive_tree_const(float f);
 float libfive_tree_get_const(libfive_tree t, bool* success);
 
 /*
- *  Constructs a tree with the given no-argument opcode
+ *  Constructs a tree with the given no-argument opcode.
  *  Returns NULL if the opcode is invalid.
  */
 libfive_tree libfive_tree_nullary(int op);
 
 /*
- *  Constructs a tree with the given one-argument opcode
- *  Returns NULL if the opcode or argument is invalid
+ *  Constructs a tree with the given one-argument opcode.
+ *  Returns NULL if the opcode or argument is invalid.
  */
 libfive_tree libfive_tree_unary(int op, libfive_tree a);
 
@@ -243,8 +279,8 @@ __attribute__((deprecated("deprecated", "libfive_tree_nullary")))
 libfive_tree libfive_tree_nonary(int op);
 
 /*
- *  Constructs a tree with the given two-argument opcode
- *  Returns NULL if the opcode or arguments are invalid
+ *  Constructs a tree with the given two-argument opcode.
+ *  Returns NULL if the opcode or arguments are invalid.
  */
 libfive_tree libfive_tree_binary(int op, libfive_tree a, libfive_tree b);
 
@@ -260,14 +296,14 @@ const void* libfive_tree_id(libfive_tree t);
 
 /*
  *  Evaluates the given math tree at the given position.
- *  TODO:  Free variables are treated as zero
+ *  TODO:  Free variables are treated as zero.
  */
 float libfive_tree_eval_f(libfive_tree t, libfive_vec3 p);
 
 /*
  *  Evaluates the given math tree over a spatial region, returning an interval
- *  that is guaranteed to contain the result
- *  TODO:  Free variables are treated as zero
+ *  that is guaranteed to contain the result.
+ *  TODO:  Free variables are treated as zero.
  */
 libfive_interval libfive_tree_eval_r(libfive_tree t, libfive_region3 r);
 
@@ -284,167 +320,174 @@ libfive_tree libfive_tree_clone(libfive_tree t);
 
 /*
  *  Deletes a tree.  If binding in a higher-level language, call this in
- *  a destructor / finalizer to avoid leaking memory
+ *  a destructor / finalizer to avoid leaking memory.
  */
 void libfive_tree_delete(libfive_tree ptr);
 
 /*  Serializes the given tree to a file, return true on success.
- *  The file format is not archival, and may change without notice */
+ *  The file format is not archival, and may change without notice
+ */
 bool libfive_tree_save(libfive_tree ptr, const char* filename);
 
 /*  Deserializes a tree from a file. */
 libfive_tree libfive_tree_load(const char* filename);
 
 /*  Executes the remapping operation returning a tree
- *  q(x, y, z) = p(x'(x, y, z), y'(x, y, z), z'(x, y, z)) */
+ *  q(x, y, z) = p(x'(x, y, z), y'(x, y, z), z'(x, y, z)).
+ */
 libfive_tree libfive_tree_remap(libfive_tree p,
         libfive_tree x, libfive_tree y, libfive_tree z);
 
 /*
- *  Returns an optimized version of the given tree
+ *  Returns an optimized version of the given tree.
  */
-libfive_tree libfive_tree_optimized(libfive_tree t);
+libfive_tree libfive_tree_optimize(libfive_tree t);
 
 /*
  *  Returns a C string representing the tree in Scheme style
- *  (e.g. "(+ 1 2 x y)" )
+ *  (e.g. "(+ 1 2 x y)" ).
  *
- *  The caller is responsible for freeing the string with libfive_free()
+ *  The caller is responsible for freeing the string with libfive_free().
  */
 char* libfive_tree_print(libfive_tree t);
 
 /*
- *  Frees a string allocated by libfive (probably by libfive_tree_print
+ *  Frees a string allocated by libfive (probably by libfive_tree_print).
  */
 void libfive_free_str(char* ptr);
 
 ////////////////////////////////////////////////////////////////////////////////
 
 /*
- *  Renders a tree to a set of contours
+ *  Renders a tree to a set of contours.
  *
  *  R is a region that will be subdivided into an octree.  For clean
- *  triangles, it should be near-cubical, but that isn't a hard requirement
+ *  triangles, it should be near-cubical, but that isn't a hard requirement.
  *
  *  res should be approximately half the model's smallest feature size;
  *  subdivision halts when all sides of the region are below it.
  *
- *  The returned struct must be freed with libfive_contours_delete
+ *  The returned struct must be freed with libfive_contours_delete.
  */
 libfive_contours* libfive_tree_render_slice(libfive_tree tree,
                                             libfive_region2 R,
-                                            float z, float res);
+                                            float z, libfive_brep_settings S);
 /*
- *  Renders a tree to a set of contours, similar to libfive_tree_render_slice,
- *  except the contours are 3D points (see the libfive_contour3 struct) above.
+ *  Renders a tree to a set of contours, similar to libfive_tree_render_slice.
+ *
+ *  Except the contours are 3D points (see the libfive_contour3 struct above).
+ *
+ *  The returned struct must be freed with libfive_contours3_delete.
  */
 libfive_contours3* libfive_tree_render_slice3(libfive_tree tree,
                                               libfive_region2 R,
-                                              float z, float res);
+                                              float z, libfive_brep_settings S);
 
 /*
- *  Renders and saves a slice to a file
+ *  Renders and saves a slice to a file.
  *
+ *  Returns true on success, false otherwise.
  *  See argument details in libfive_tree_render_slice
  */
-void libfive_tree_save_slice(libfive_tree tree, libfive_region2 R,
-                             float z, float res, const char* f);
+bool libfive_tree_save_slice(libfive_tree tree, libfive_region2 R,
+                             float z, libfive_brep_settings S, const char* f);
 
 /*
- *  Renders a tree to a set of triangles
+ *  Renders a tree to a set of triangles.
  *
  *  R is a region that will be subdivided into an octree.  For clean
- *  triangles, it should be near-cubical, but that isn't a hard requirement
+ *  triangles, it should be near-cubical, but that isn't a hard requirement.
  *
  *  res should be approximately half the model's smallest feature size;
  *  subdivision halts when all sides of the region are below it.
  *
- *  The returned struct must be freed with libfive_mesh_delete
+ *  The returned struct must be freed with libfive_mesh_delete.
  */
 libfive_mesh* libfive_tree_render_mesh(libfive_tree tree,
-                                       libfive_region3 R, float res);
+                                       libfive_region3 R, libfive_brep_settings S);
 /*
  *  Renders to an alternate mesh format, see description of
- *  libfive_mesh_coords above.  The returned struct must be freed with
- *  libfive_mesh_coords_delete.
+ *  libfive_mesh_coords above.
+ *
+ *  The returned struct must be freed with libfive_mesh_coords_delete.
  */
 libfive_mesh_coords* libfive_tree_render_mesh_coords(libfive_tree tree,
                                                      libfive_region3 R,
-                                                     float res);
+                                                     libfive_brep_settings S);
 
 /*
- *  Renders and saves a mesh to a file
+ *  Renders and saves a mesh to a file.
  *
- *  Returns true on success, false otherwise
- *  See argument details in libfive_tree_render_mesh
+ *  Returns true on success, false otherwise.
+ *  See argument details in libfive_tree_render_mesh.
  */
 bool libfive_tree_save_mesh(libfive_tree tree, libfive_region3 R,
-                            float res, const char* f);
+                            libfive_brep_settings S, const char* f);
 
 /*
- *  Renders and saves a mesh to a file
+ *  Renders and saves a mesh to a file.
  *
- *  Returns true on success, false otherwise
- *  Second argument is an evaluator
- *  See other argument details in libfive_tree_render_mesh
+ *  Returns true on success, false otherwise.
+ *  Second argument is an evaluator.
+ *  See other argument details in libfive_tree_render_mesh.
  */
 bool libfive_evaluator_save_mesh(libfive_evaluator evaluator, libfive_region3 R,
-                                 const char *f);
+                                 libfive_brep_settings S, const char *f);
 
 /*
- *  Renders and saves multiple meshes mesh to a file
+ *  Renders and saves multiple meshes mesh to a file.
  *
- *  Returns true on success, false otherwise
+ *  Returns true on success, false otherwise.
  *
  *  Arguments are equivalent to Studio's resolution and quality
  *  settings.  In particular quality is a value q such that we
- *  collapse cells when the QEF error is below 10**(-q)
+ *  collapse cells when the QEF error is below 10**(-q).
  *
  *  trees is a null-terminated list (since libfive_tree is a pointer
  *  under the hood).
  */
-bool libfive_tree_save_meshes(
-        libfive_tree trees[], libfive_region3 R,
-        float res, float quality, const char* f);
+bool libfive_tree_save_meshes(libfive_tree trees[], libfive_region3 R,
+                              libfive_brep_settings S, const char* f);
 
 /*
- *  Renders a 2D slice of pixels at the given Z height
+ *  Renders a 2D slice of pixels at the given Z height.
  *
- *  The returned struct must be freed with libfive_pixels_delete
+ *  The returned struct must be freed with libfive_pixels_delete.
  */
 libfive_pixels* libfive_tree_render_pixels(libfive_tree tree,
                                            libfive_region2 R,
                                            float z, float res);
 
 /*
- *  Constructs a new evaluator
+ *  Constructs a new evaluator.
  */
 libfive_evaluator libfive_tree_evaluator(libfive_tree tree, libfive_vars vars);
 
 /*
- *  Updates the variables of the evaluator
+ *  Updates the variables of the evaluator.
  */
-bool libfive_evaluator_update_vars(libfive_evaluator eval_tree, libfive_vars vars);
+bool libfive_evaluator_update_vars(libfive_evaluator eval_tree,
+                                   libfive_vars vars);
 
 /*
- *  Deletes (first) evaluator.  TODO: if settings.workers > 1
+ *  Deletes (first) evaluator.  TODO: if settings.workers > 1.
  */
 void libfive_evaluator_delete(libfive_evaluator ptr);
 
 /*
  *  Returns the human-readable tag associated with this build,
- *  or the empty string if there is no such tag
+ *  or the empty string if there is no such tag.
  */
 const char* libfive_git_version(void);
 
 /*
  *  Returns the 7-character git hash associated with this build,
- *  with a trailing '+' if there are local (uncommitted) modifications
+ *  with a trailing '+' if there are local (uncommitted) modifications.
  */
 const char* libfive_git_revision(void);
 
 /*
- *  Returns the name of the branch associated with this build
+ *  Returns the name of the branch associated with this build.
  */
 const char* libfive_git_branch(void);
 

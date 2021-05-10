@@ -28,6 +28,17 @@ You can obtain one at http://mozilla.org/MPL/2.0/.
 
 using namespace libfive;
 
+#define COPY_SETTINGS(a, b) \
+    b.min_feature = 1/a.res; \
+    b.max_err = pow(10, -a.quality); \
+    b.workers = a.workers; \
+    b.alg = (BRepAlgorithm) a.alg; \
+
+libfive_brep_settings libfive_brep_settings_default() {
+    auto s = LIBFIVE_BREP_SETTINGS_DEFAULT();
+    return s;
+}
+
 void libfive_contours_delete(libfive_contours* cs)
 {
     for (unsigned i=0; i < cs->count; ++i)
@@ -203,7 +214,7 @@ libfive_tree libfive_tree_remap(libfive_tree p, libfive_tree x, libfive_tree y, 
     return Tree(p).remap(Tree(x), Tree(y), Tree(z)).release();
 }
 
-libfive_tree libfive_tree_optimized(libfive_tree t) {
+libfive_tree libfive_tree_optimize(libfive_tree t) {
     return Tree(t).optimized().release();
 }
 
@@ -246,12 +257,13 @@ void libfive_free_str(char* ptr) {
 ////////////////////////////////////////////////////////////////////////////////
 
 libfive_contours* libfive_tree_render_slice(libfive_tree tree,
-        libfive_region2 R, float z, float res)
+        libfive_region2 R, float z, libfive_brep_settings S)
 {
     Region<2> region({R.X.lower, R.Y.lower}, {R.X.upper, R.Y.upper},
             Region<2>::Perp(z));
     BRepSettings settings;
-    settings.min_feature = 1/res;
+    COPY_SETTINGS(S, settings);
+
     auto cs = Contours::render(Tree(tree), region, settings);
 
     auto out = new libfive_contours;
@@ -276,12 +288,13 @@ libfive_contours* libfive_tree_render_slice(libfive_tree tree,
 }
 
 libfive_contours3* libfive_tree_render_slice3(libfive_tree tree,
-                                              libfive_region2 R, float z, float res)
+                                              libfive_region2 R, float z,
+                                              libfive_brep_settings S)
 {
     Region<2> region({R.X.lower, R.Y.lower}, {R.X.upper, R.Y.upper},
             Region<2>::Perp(z));
     BRepSettings settings;
-    settings.min_feature = 1/res;
+    COPY_SETTINGS(S, settings);
     auto cs = Contours::render(Tree(tree), region, settings);
 
     auto out = new libfive_contours3;
@@ -307,23 +320,24 @@ libfive_contours3* libfive_tree_render_slice3(libfive_tree tree,
     return out;
 }
 
-void libfive_tree_save_slice(libfive_tree tree, libfive_region2 R, float z, float res,
-                        const char* f)
+bool libfive_tree_save_slice(libfive_tree tree, libfive_region2 R, float z,
+                             libfive_brep_settings S, const char* f)
 {
     Region<2> region({R.X.lower, R.Y.lower}, {R.X.upper, R.Y.upper},
             Region<2>::Perp(z));
     BRepSettings settings;
-    settings.min_feature = 1/res;
+    COPY_SETTINGS(S, settings);
     auto cs = Contours::render(Tree(tree), region, settings);
-    cs->saveSVG(f);
+    return cs->saveSVG(f);
 }
 
-libfive_mesh* libfive_tree_render_mesh(libfive_tree tree, libfive_region3 R, float res)
+libfive_mesh* libfive_tree_render_mesh(libfive_tree tree, libfive_region3 R,
+                                       libfive_brep_settings S)
 {
     Region<3> region({R.X.lower, R.Y.lower, R.Z.lower},
                      {R.X.upper, R.Y.upper, R.Z.upper});
     BRepSettings settings;
-    settings.min_feature = 1/res;
+    COPY_SETTINGS(S, settings);
     auto ms = Mesh::render(Tree(tree), region, settings);
     if (ms.get() == nullptr)
     {
@@ -356,12 +370,12 @@ libfive_mesh* libfive_tree_render_mesh(libfive_tree tree, libfive_region3 R, flo
 
 libfive_mesh_coords* libfive_tree_render_mesh_coords(libfive_tree tree,
                                                      libfive_region3 R,
-                                                     float res)
+                                                     libfive_brep_settings S)
 {
     Region<3> region({R.X.lower, R.Y.lower, R.Z.lower},
                      {R.X.upper, R.Y.upper, R.Z.upper});
     BRepSettings settings;
-    settings.min_feature = 1/res;
+    COPY_SETTINGS(S, settings);
     auto ms = Mesh::render(Tree(tree), region, settings);
     if (ms.get() == nullptr)
     {
@@ -397,38 +411,39 @@ libfive_mesh_coords* libfive_tree_render_mesh_coords(libfive_tree tree,
     return out;
 }
 
-bool libfive_tree_save_mesh(libfive_tree tree, libfive_region3 R, float res, const char* f)
+bool libfive_tree_save_mesh(libfive_tree tree, libfive_region3 R,
+                            libfive_brep_settings S, const char* f)
 {
     Region<3> region({R.X.lower, R.Y.lower, R.Z.lower},
                      {R.X.upper, R.Y.upper, R.Z.upper});
 
     BRepSettings settings;
-    settings.min_feature = 1/res;
+    COPY_SETTINGS(S, settings);
     auto ms = Mesh::render(Tree(tree), region, settings);
     return ms->saveSTL(f);
 }
 
-bool libfive_evaluator_save_mesh(libfive_evaluator evaluator, libfive_region3 R, const char *f)
-{
-    Region<3> region({R.X.lower, R.Y.lower, R.Z.lower},
-                     {R.X.upper, R.Y.upper, R.Z.upper});
-
-    BRepSettings settings; // TODO: pass it in as an argument
-    settings.workers = 1;  // NOTE: temporary limitation
-    auto ms = Mesh::render(evaluator, region, settings);
-    return ms->saveSTL(f);
-}
-
-bool libfive_tree_save_meshes(
-        libfive_tree trees[], libfive_region3 R,
-        float res, float quality, const char* f)
+bool libfive_evaluator_save_mesh(libfive_evaluator evaluator, libfive_region3 R,
+                                 libfive_brep_settings S, const char *f)
 {
     Region<3> region({R.X.lower, R.Y.lower, R.Z.lower},
                      {R.X.upper, R.Y.upper, R.Z.upper});
 
     BRepSettings settings;
-    settings.min_feature = 1/res;
-    settings.max_err = pow(10, -quality);
+    COPY_SETTINGS(S, settings);
+    //settings.workers = 1;  // NOTE: temporary limitation
+    auto ms = Mesh::render(evaluator, region, settings);
+    return ms->saveSTL(f);
+}
+
+bool libfive_tree_save_meshes(libfive_tree trees[], libfive_region3 R,
+                              libfive_brep_settings S, const char* f)
+{
+    Region<3> region({R.X.lower, R.Y.lower, R.Z.lower},
+                     {R.X.upper, R.Y.upper, R.Z.upper});
+
+    BRepSettings settings;
+    COPY_SETTINGS(S, settings);
     std::list<const libfive::Mesh*> meshes;
     for (unsigned i=0; trees[i] != nullptr; ++i){
         auto ms = Mesh::render(Tree(trees[i]), region, settings);
@@ -443,7 +458,7 @@ bool libfive_tree_save_meshes(
 }
 
 libfive_pixels* libfive_tree_render_pixels(libfive_tree tree, libfive_region2 R,
-                                 float z, float res)
+                                           float z, float res)
 {
     Voxels v({R.X.lower, R.Y.lower, z},
              {R.X.upper, R.Y.upper, z}, res);
