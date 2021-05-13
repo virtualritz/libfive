@@ -100,12 +100,12 @@ Window::Window(Arguments args)
     open_action->setShortcut(QKeySequence::Open);
     connect(open_action, &QAction::triggered, this, &Window::onOpen);
 
-    auto open_viewer = file_menu->addAction("Open as viewer...");
+    auto open_viewer = file_menu->addAction("Open as Viewer...");
     connect(open_viewer, &QAction::triggered, this, &Window::onOpenViewer);
 
     // Add a "Revert to saved" item, which is only enabled if there are
     // unsaved changes and there's an existing filename to load from.
-    auto revert_action = file_menu->addAction("Revert to saved");
+    auto revert_action = file_menu->addAction("Revert to Saved");
     connect(revert_action, &QAction::triggered, this, &Window::onRevert);
     connect(editor, &Editor::modificationChanged,
             revert_action, [=](bool changed){
@@ -151,7 +151,7 @@ Window::Window(Arguments args)
 
     edit_menu->addSeparator();
 
-    auto autoload_action = edit_menu->addAction("Automatically reload changes");
+    auto autoload_action = edit_menu->addAction("Automatically Reload Changes");
     connect(autoload_action, &QAction::triggered, this,
             [&](bool b) { autoreload = b; });
     autoload_action->setCheckable(true);
@@ -162,13 +162,13 @@ Window::Window(Arguments args)
 
     // Settings menu
     auto view_menu = menuBar()->addMenu("&View");
-    auto show_axes_action = view_menu->addAction("Show axes");
+    auto show_axes_action = view_menu->addAction("Show Axes");
     show_axes_action->setCheckable(true);
     show_axes_action->setChecked(true);
     connect(show_axes_action, &QAction::triggered,
             view, &View::showAxes);
 
-    auto show_bbox_action = view_menu->addAction("Show bounding box(es)");
+    auto show_bbox_action = view_menu->addAction("Show Sounding Box(es)");
     show_bbox_action->setCheckable(true);
     connect(show_bbox_action, &QAction::triggered, view, &View::showBBox);
 
@@ -189,9 +189,9 @@ Window::Window(Arguments args)
             view, &View::toOrthographic);
     view_menu->addMenu(proj_menu);
 
-    auto turn_z_up = new QAction("Turntable (Z up)", nullptr);
-    auto turn_y_up = new QAction("Turntable (Y up)", nullptr);
-    auto rotation_menu = new QMenu("Rotation mode");
+    auto turn_z_up = new QAction("Turntable (Z Up)", nullptr);
+    auto turn_y_up = new QAction("Turntable (Y Up)", nullptr);
+    auto rotation_menu = new QMenu("Rotation Mode");
     rotation_menu->addAction(turn_z_up);
     rotation_menu->addAction(turn_y_up);
     turn_z_up->setCheckable(true);
@@ -207,7 +207,7 @@ Window::Window(Arguments args)
     auto sensitivity_low = new QAction("Low", nullptr);
     auto sensitivity_medium = new QAction("Medium", nullptr);
     auto sensitivity_high = new QAction("High", nullptr);
-    auto sensitivity_menu = new QMenu("Rotation sensitivity");
+    auto sensitivity_menu = new QMenu("Rotation Sensitivity");
     sensitivity_menu->addAction(sensitivity_low);
     sensitivity_menu->addAction(sensitivity_medium);
     sensitivity_menu->addAction(sensitivity_high);
@@ -225,16 +225,16 @@ Window::Window(Arguments args)
     view_menu->addMenu(sensitivity_menu);
 
     view_menu->addSeparator();
-    auto zoom_to_action = new QAction("Zoom to bounds", nullptr);
+    auto zoom_to_action = new QAction("Zoom to Bounds", nullptr);
     view_menu->addAction(zoom_to_action);
     connect(zoom_to_action, &QAction::triggered, view, &View::zoomTo);
 
     // Debug menu
     auto debug_menu = menuBar()->addMenu("Debug");
-    auto dc_meshing = new QAction("Dual contouring", nullptr);
-    auto iso_meshing = new QAction("Iso-simplex", nullptr);
+    auto dc_meshing = new QAction("Dual Contouring", nullptr);
+    auto iso_meshing = new QAction("Iso-Simplex", nullptr);
     auto hybrid_meshing = new QAction("Hybrid", nullptr);
-    auto meshing_menu = new QMenu("Meshing algorithm");
+    auto meshing_menu = new QMenu("Meshing Algorithm");
     auto meshing_mode = new QActionGroup(meshing_menu);
     debug_menu->addMenu(meshing_menu);
 
@@ -258,7 +258,7 @@ Window::Window(Arguments args)
         m->setCheckable(true);
     }
     lang_menu->addSeparator();
-    auto lang_load_default = new QAction("Load default script", nullptr);
+    auto lang_load_default = new QAction("Load Default Script", nullptr);
     lang_menu->addAction(lang_load_default);
     switch (editor->getLanguage()) {
         case Language::LANGUAGE_GUILE: lang_guile->setChecked(true); break;
@@ -282,9 +282,9 @@ Window::Window(Arguments args)
     auto help_menu = menuBar()->addMenu("Help");
     connect(help_menu->addAction("About"), &QAction::triggered,
             this, &Window::onAbout);
-    connect(help_menu->addAction("Load tutorial"), &QAction::triggered,
+    connect(help_menu->addAction("Load Tutorial"), &QAction::triggered,
             this, &Window::onLoadTutorial);
-    auto ref_action = help_menu->addAction("Shape reference");
+    auto ref_action = help_menu->addAction("Shape Reference");
     ref_action->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Slash));
     connect(ref_action, &QAction::triggered, editor, &Editor::onShowDocs);
 
@@ -335,7 +335,7 @@ bool Window::onOpen(bool)
     CHECK_UNSAVED();
 
     QString f = QFileDialog::getOpenFileName(this, "Open",
-            workingDirectory(), "Studio (*.io *.py);;Any files (*)");
+            workingDirectory(), "Studio (*.io *.py);;Any Files (*)");
     if (!f.isEmpty())
     {
         return openFile(f);
@@ -434,8 +434,8 @@ bool Window::saveFile(QString f)
     {
 
         QMessageBox m(this);
-        m.setText("Failed to save file");
-        m.setInformativeText("<code>" + f + "</code><br>is not writable");
+        m.setText("Failed to save file.");
+        m.setInformativeText("<code>" + f + "</code><br>is not writable.");
         m.addButton(QMessageBox::Ok);
         m.setIcon(QMessageBox::Critical);
         m.setWindowModality(Qt::WindowModal);
@@ -445,8 +445,8 @@ bool Window::saveFile(QString f)
     if (!file.open(QIODevice::WriteOnly))
     {
         QMessageBox m(this);
-        m.setText("Failed to save file");
-        m.setInformativeText("<code>" + f + "</code><br>does not exist");
+        m.setText("Failed to save file.");
+        m.setInformativeText("<code>" + f + "</code><br>does not exist.");
         m.addButton(QMessageBox::Ok);
         m.setIcon(QMessageBox::Critical);
         m.setWindowModality(Qt::WindowModal);
@@ -477,7 +477,7 @@ bool Window::onSave(bool)
 
 bool Window::onSaveAs(bool)
 {
-    QString f = QFileDialog::getSaveFileName(this, "Save as",
+    QString f = QFileDialog::getSaveFileName(this, "Save As",
             workingDirectory(),
             QString("Studio (*%1);;Any files (*)").arg(editor->getExtension()));
     if (!f.isEmpty())
@@ -628,8 +628,8 @@ void Window::onExportReady(QList<const libfive::Mesh*> shapes)
                                 std::list<const libfive::Mesh*>(shapes.begin(), shapes.end())))
     {
         QMessageBox m(this);
-        m.setText("Could not save file");
-        m.setInformativeText("Check the console for more information");
+        m.setText("Could not save file.");
+        m.setInformativeText("Check the console for more information.");
         m.addButton(QMessageBox::Ok);
         m.setIcon(QMessageBox::Critical);
         m.setWindowModality(Qt::WindowModal);
@@ -673,7 +673,7 @@ void Window::onExport(bool)
 
 void Window::onAbout(bool)
 {
-    QString info = "A Scheme-based GUI for<br>the libfive CAD kernel<br><br>";
+    QString info = "A Scheme-based GUI for<br>the <i>libfive</i> CAD kernel<br><br>";
 
     info += strlen(libfive_git_version())
         ? "Version: <code>" + QString(libfive_git_version()) + "</code><br>"
