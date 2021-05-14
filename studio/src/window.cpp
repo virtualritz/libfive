@@ -168,7 +168,7 @@ Window::Window(Arguments args)
     connect(show_axes_action, &QAction::triggered,
             view, &View::showAxes);
 
-    auto show_bbox_action = view_menu->addAction("Show Sounding Box(es)");
+    auto show_bbox_action = view_menu->addAction("Show Bounding Box(es)");
     show_bbox_action->setCheckable(true);
     connect(show_bbox_action, &QAction::triggered, view, &View::showBBox);
 
