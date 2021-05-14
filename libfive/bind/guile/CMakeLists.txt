@@ -9,6 +9,7 @@ set(SRCS
 
     libfive/stdlib/csg.scm
     libfive/stdlib/shapes.scm
+    libfive/stdlib/generators.scm
     libfive/stdlib/text.scm
     libfive/stdlib/transforms.scm)
 

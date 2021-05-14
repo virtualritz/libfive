@@ -7,6 +7,7 @@ set(SRCS
     libfive/stdlib/__init__.py
     libfive/stdlib/csg.py
     libfive/stdlib/shapes.py
+    libfive/stdlib/generators.py
     libfive/stdlib/transforms.py
     libfive/stdlib/text.py
 )
