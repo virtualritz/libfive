@@ -216,7 +216,7 @@ class Shape:
         return Shape.new('compare', self.ptr, other.ptr)
 
     def save_stl(self, filename, xyz_min=(-10,-10,-10), xyz_max=(10,10,10),
-                 resolution=10):
+                 resolution=10, quality=8):
         ''' Converts this Shape into a mesh and saves it as an STL file.
 
             xyz_min/max are three-element lists of corner positions
@@ -225,7 +225,9 @@ class Shape:
         '''
         region = libfive_region_t(*[libfive_interval_t(a, b) for a, b
                                     in zip(xyz_min, xyz_max)])
-        lib.libfive_tree_save_mesh(self.ptr, region, resolution,
+        lib.libfive_tree_save_mesh(self.ptr, region,
+                                   libfive_brep_settings_t(resolution,
+                                                           quality, 8, 0),
                                    filename.encode('ascii'))
 
     def show(self, xyz_min=(-10,-10,-10), xyz_max=(10,10,10), resolution=10):

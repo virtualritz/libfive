@@ -10,6 +10,14 @@ You can obtain one at http://mozilla.org/MPL/2.0/.
 import ctypes
 import os
 import sys
+from enum import IntEnum
+
+# Define the types we need.
+class CtypesEnum(IntEnum):
+    """A ctypes-compatible IntEnum superclass."""
+    @classmethod
+    def from_param(cls, obj):
+        return int(obj)
 
 def try_link(folder, name):
     if sys.platform == "linux" or sys.platform == "linux2":
@@ -61,6 +69,15 @@ class libfive_vec3_t(ctypes.Structure):
     _fields_ = [("x", ctypes.c_float),
                 ("y", ctypes.c_float),
                 ("z", ctypes.c_float)]
+class libfive_brep_alg_t(CtypesEnum):
+    DUAL_CONTOURING = 0
+    ISO_SIMPLEX = 1
+    HYBRID = 2
+class libfive_brep_settings_t(ctypes.Structure):
+    _fields_ = [("res", ctypes.c_float),
+                ("quality", ctypes.c_float),
+                ("workers", ctypes.c_uint)
+                ("alg", libfive_brep_alg_t)]
 
 libfive_tree = ctypes.c_void_p
 
@@ -110,10 +127,10 @@ lib.libfive_tree_print.restype = ctypes.c_void_p # actually a c_char_p,
 
 lib.libfive_free_str.argtypes = [ctypes.c_char_p]
 
-lib.libfive_tree_save_mesh.argtypes = [libfive_tree, libfive_region_t, ctypes.c_float, ctypes.c_char_p]
+lib.libfive_tree_save_mesh.argtypes = [libfive_tree, libfive_region_t, libfive_brep_settings_t, ctypes.c_char_p]
 lib.libfive_tree_save_mesh.restype = ctypes.c_uint8
 
-lib.libfive_tree_save_meshes.argtypes = [libfive_tree, libfive_region_t, ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
+lib.libfive_tree_save_meshes.argtypes = [libfive_tree, libfive_region_t, libfive_brep_settings_t, ctypes.c_char_p]
 lib.libfive_tree_save_meshes.restype = ctypes.c_uint8
 
 lib.libfive_tree_save.argtypes = [libfive_tree, ctypes.c_char_p]
