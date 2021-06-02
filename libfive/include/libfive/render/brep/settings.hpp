@@ -56,7 +56,7 @@ public:
      *  platform-default number of threads. */
     unsigned workers;
 
-    /*  This is the meshing algorti */
+    /*  The meshing algorithm. */
     BRepAlgorithm alg;
 
     /*  Optional function called when a thread finds itself without anything
